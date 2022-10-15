@@ -476,9 +476,16 @@ def checkLocationSatisfiability(
             successorAxioms=allLegalSuccessorAxioms,
         )
     )
+    # No part of the project requires doing KB >> anything.
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+    # We need to note that KB implies A is satisfied by setting KB false
+    # which is not what we want to allow because KB is true.
     KB.append(PropSymbolExpr(action0, time=0))
     KB.append(PropSymbolExpr(action1, time=1))
+
+    # All we are doing is trying to check if .... could be true, given KB as true.
+    # We know that KB is true and want to simply check if something is possible,
+    # and find that model(Dir) where all could satisfied (being true)
     model1 = findModel(conjoin(KB) & PropSymbolExpr(pacman_str, x1, y1, time=1))
     model2 = findModel(conjoin(KB) & ~PropSymbolExpr(pacman_str, x1, y1, time=1))
 
