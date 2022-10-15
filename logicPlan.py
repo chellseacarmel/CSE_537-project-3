@@ -159,6 +159,8 @@ def findModelCheck() -> Dict[Any, bool]:
 def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise."""
     "*** BEGIN YOUR CODE HERE ***"
+    # return findModel(~ premise | conclusion)
+    # if there is no counterexample, then the entail is true
     c = premise & (~conclusion)
     return findModel(c) == False
     util.raiseNotDefined()
@@ -199,6 +201,7 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
+    # it returns a Expr instance!!!
     return disjoin(literals)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
@@ -274,8 +277,9 @@ def pacmanSuccessorAxiomSingle(
         return None
 
     "*** BEGIN YOUR CODE HERE ***"
-    moved_causes_sent = conjoin([disjoin(possible_causes)])
-    return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % moved_causes_sent)
+    # We are using Conjoin of Disjoin of given possible causes.
+    moved_sent_causes = conjoin([disjoin(possible_causes)])
+    return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % moved_sent_causes)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -405,6 +409,7 @@ def pacphysicsAxioms(
     pacphysics_sentences.append(
         exactlyOne([PropSymbolExpr(action, time=t) for action in DIRECTIONS])
     )
+    # Setting time=t everywhere for PropSymbolExpr() in this .py file.
     if sensorModel:
         pacphysics_sentences.append(sensorModel(t, non_outer_wall_coords))
 
@@ -483,6 +488,7 @@ def checkLocationSatisfiability(
 # ______________________________________________________________________________
 # QUESTION 4
 
+
 def positionLogicPlan(problem) -> List:
     """
     Given an instance of a PositionPlanningProblem, return a list of actions that lead to the goal.
@@ -511,7 +517,7 @@ def positionLogicPlan(problem) -> List:
 
         # Add to KB that Pacman can only be at exactlyOne of the locations in non_wall_coords at timestep t.
         possible_locs = []
-        for i,j in non_wall_coords:
+        for i, j in non_wall_coords:
             possible_locs.append(PropSymbolExpr(pacman_str, i, j, time=t))
         curr_loc = exactlyOne(possible_locs)
         KB.append(curr_loc)
@@ -525,7 +531,7 @@ def positionLogicPlan(problem) -> List:
 
         # Add to KB the Transition Model sentences
         if t > 0:
-            for i,j in non_wall_coords:
+            for i, j in non_wall_coords:
                 KB.append(pacmanSuccessorAxiomSingle(i, j, t, walls_grid))
 
         # Is there a satisfying assignment for the variables given the knowledge base so far
@@ -537,7 +543,7 @@ def positionLogicPlan(problem) -> List:
             path.pop()
             return path
 
-    #util.raiseNotDefined()
+    # util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
 
