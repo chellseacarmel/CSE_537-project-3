@@ -483,7 +483,6 @@ def checkLocationSatisfiability(
 # ______________________________________________________________________________
 # QUESTION 4
 
-
 def positionLogicPlan(problem) -> List:
     """
     Given an instance of a PositionPlanningProblem, return a list of actions that lead to the goal.
@@ -503,8 +502,42 @@ def positionLogicPlan(problem) -> List:
     actions = ["North", "South", "East", "West"]
     KB = []
 
-    "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # "*** BEGIN YOUR CODE HERE ***"
+
+    # Add to KB the Initial knowledge with Pacman's initial location at timestep 0
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+
+    for t in range(50):
+
+        # Add to KB that Pacman can only be at exactlyOne of the locations in non_wall_coords at timestep t.
+        possible_locs = []
+        for i,j in non_wall_coords:
+            possible_locs.append(PropSymbolExpr(pacman_str, i, j, time=t))
+        curr_loc = exactlyOne(possible_locs)
+        KB.append(curr_loc)
+
+        # Add to KB that Pacman takes exactly one action per timestep.
+        possible_moves = []
+        for action in actions:
+            possible_moves.append(PropSymbolExpr(action, time=t))
+        curr_move = exactlyOne(possible_moves)
+        KB.append(curr_move)
+
+        # Add to KB the Transition Model sentences
+        if t > 0:
+            for i,j in non_wall_coords:
+                KB.append(pacmanSuccessorAxiomSingle(i, j, t, walls_grid))
+
+        # Is there a satisfying assignment for the variables given the knowledge base so far
+        assignment = findModel(conjoin(KB) & PropSymbolExpr(pacman_str, xg, yg, time=t))
+
+        # If there is, return a sequence of actions from start to goal using extractActionSequence.
+        if assignment:
+            path = extractActionSequence(assignment, actions)
+            path.pop()
+            return path
+
+    #util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
 
